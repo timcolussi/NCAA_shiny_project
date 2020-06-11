@@ -1,7 +1,7 @@
 library(tidyverse)
 library(ggplot2)
 
-final_compare_ncaa_conf_wins_seeds_champs <- read_csv("NYCDSA/Shiny_project/final_compare_ncaa_conf_wins_seeds_champs.csv")
+final_compare_ncaa_conf_wins_seeds_champs <- read_csv("/NYCDSA/Shiny_project/NCAA_shiny_project/final_compare_ncaa_conf_wins_seeds_champs.csv")
   cols(
     season = col_double(),
     teamid = col_double(),
@@ -14,6 +14,8 @@ final_compare_ncaa_conf_wins_seeds_champs <- read_csv("NYCDSA/Shiny_project/fina
     conf_tourney_champ = col_double()
   )
 
+final_compare_ncaa_conf_wins_seeds_champs <- read_csv("final_compare_ncaa_conf_wins_seeds_champs.csv")  
+  
 data <- final_compare_ncaa_conf_wins_seeds_champs
 
 data <- data[-c(1263,1264), ]
@@ -81,7 +83,7 @@ data_no_one_bid$confabbrev <- str_replace(data_no_one_bid$confabbrev, "pac_ten",
 
 
 by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
-  geom_jitter(aes(color = confabbrev), width = .1) + 
+  geom_jitter(aes(color = conf_name), width = .1) + 
   geom_hline(yintercept = 5.5) + 
   geom_hline(yintercept = 4.5) + 
   geom_hline(yintercept = 3.5) + 
@@ -289,7 +291,7 @@ wins_by_conftype <- ggplot(ave_wins_wins, aes(x = conf_type, y = ave_ncaa_wins))
   geom_bar(aes(fill = conftour_wins), stat = 'identity', position = 'dodge')
 
 
-teams <- read_csv("google-cloud-ncaa-march-madness-2020-division-1-mens-tournament (1)/MDataFiles_Stage1/MTeams.csv")
+teams <- read_csv("MTeams.csv")
   
 acc <- data_no_one_bid %>% 
   filter(confabbrev == 'acc')
