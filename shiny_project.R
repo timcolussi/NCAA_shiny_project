@@ -94,9 +94,9 @@ by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wi
   ylab("NCAA Tournament Wins") + 
   theme_bw() + 
   theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+        panel.grid.minor = element_blank()) 
 
-by_larger_conf + facet_wrap(~ confabbrev)  
+by_larger_conf + facet_wrap(~ conf_name) + theme(legend.position = "none")
 
 data_no_one_bid %>% 
   filter(confabbrev == "acc" & ncaatour_wins == 6)
@@ -170,6 +170,8 @@ conf_champs_wins <- conf_champs %>%
 conf_champs_ave_wins <- conf_champs_wins %>% 
   group_by(confabbrev) %>% 
   summarise(average_wins = mean(tournament_wins))
+
+conferences <- read.csv('Conferences.csv')
 
 ggplot(conf_champs_ave_wins, aes(x = confabbrev, y = average_wins)) +
   geom_bar(aes(fill = confabbrev), stat = "Identity") +
@@ -268,9 +270,22 @@ ave_wins_confwins$conftour_wins <- factor(ave_wins_confwins$conftour_wins,
                                                      'two',
                                                      'one',
                                                      'zero'))
-wins_byconf_faceted <- ggplot(ave_wins_confwins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+
+ave_wins_confwins2 <- left_join(ave_wins_confwins, conferences[, c('ConfAbbrev', 'Description')],
+                                by = c('confabbrev' = 'ConfAbbrev'))
+ave_wins_confwins2 <- ave_wins_confwins2 %>% 
+  rename('ConfName' = 'Description')
+
+ave_wins_confwins2$ConfName  <- str_replace(ave_wins_confwins2$ConfName, 'Conference', '')
+ave_wins_confwins2$ConfName <- str_replace(ave_wins_confwins2$ConfName, 'USA', 'Conference USA')
+ave_wins_confwins2$ConfName <- str_replace(ave_wins_confwins2$ConfName, 'Southeastern', 'SEC')
+
+wins_byconf_faceted <- ggplot(ave_wins_confwins2, aes(x = conftour_wins, y = ave_ncaa_wins)) +
   geom_bar(aes(fill = conftour_wins), stat = 'identity', position = 'dodge') +
-  facet_wrap(~ confabbrev)
+  facet_wrap(~ ConfName) +
+  xlab("Conference Tournament Wins") +
+  ylab("Average NCAA Tournament Wins") +
+  theme(legend.position = "none")
 
 power_confs <- conf_ave_teams %>% 
   filter(ave_num_teams > 4)
@@ -287,8 +302,11 @@ mid_ave_wins_wins$conf_type <- 'mid major'
 ave_wins_wins <- rbind(power_ave_wins_wins, mid_ave_wins_wins)
 ave_wins_wins$conf_type <- as.factor(ave_wins_wins$conf_type)
 
-wins_by_conftype <- ggplot(ave_wins_wins, aes(x = conf_type, y = ave_ncaa_wins)) +
-  geom_bar(aes(fill = conftour_wins), stat = 'identity', position = 'dodge')
+wins_by_conftype <- ggplot(ave_wins_wins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conf_type), stat = 'identity', position = 'dodge') +
+  xlab("Conference Tournament Wins") +
+  ylab("Average NCAA Tournament Wins") +
+  guides(fill=guide_legend(title="Conference Type"))
 
 
 teams <- read_csv("MTeams.csv")
