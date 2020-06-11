@@ -1,20 +1,20 @@
 library(tidyverse)
 library(ggplot2)
 
-final_compare_ncaa_conf_wins_seeds_champs <- read_csv("/NYCDSA/Shiny_project/NCAA_shiny_project/final_compare_ncaa_conf_wins_seeds_champs.csv")
-  cols(
-    season = col_double(),
-    teamid = col_double(),
-    teamname = col_character(),
-    ncaatour_wins = col_double(),
-    conftour_wins = col_double(),
-    confabbrev = col_character(),
-    conf_name = col_character(),
-    seed = col_character(),
-    conf_tourney_champ = col_double()
-  )
+#final_compare_ncaa_conf_wins_seeds_champs <- read_csv("/NYCDSA/Shiny_project/NCAA_shiny_project/final_compare_ncaa_conf_wins_seeds_champs.csv")
+  #cols(
+    #season = col_double(),
+    #teamid = col_double(),
+    #teamname = col_character(),
+    #ncaatour_wins = col_double(),
+    #conftour_wins = col_double(),
+    #confabbrev = col_character(),
+    #conf_name = col_character(),
+    #seed = col_character(),
+    #conf_tourney_champ = col_double()
+  #)
 
-final_compare_ncaa_conf_wins_seeds_champs <- read_csv("final_compare_ncaa_conf_wins_seeds_champs.csv")  
+final_compare_ncaa_conf_wins_seeds_champs <- read.csv("final_compare_ncaa_conf_wins_seeds_champs.csv")  
   
 data <- final_compare_ncaa_conf_wins_seeds_champs
 
@@ -38,26 +38,26 @@ by_season <- ggplot(data, aes(x = conftour_wins, y = ncaatour_wins)) +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank())
 
-data$conf_tourney_champ <- as.factor(data$conf_tourney_champ)
+#data$conf_tourney_champ <- as.factor(data$conf_tourney_champ)
 
-by_conf_champs <- ggplot(data, aes(x = conftour_wins, y = ncaatour_wins)) + 
-  geom_jitter(aes(color = conf_tourney_champ), width = .25) + 
-  geom_hline(yintercept = 5.5) + 
-  geom_hline(yintercept = 4.5) + 
-  geom_hline(yintercept = 3.5) + 
-  geom_hline(yintercept = 2.5) + 
-  geom_hline(yintercept = 1.5) + 
-  geom_hline(yintercept = 0.5) + 
-  labs(x = "Conference Tournament Wins", y = "NCAA Tournament Wins") +
-  scale_color_discrete(name="Conf. Tourney Champs",
-                       labels = c("No", "Yes")) +
-  theme_bw() + 
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
+# by_conf_champs <- ggplot(data, aes(x = conftour_wins, y = ncaatour_wins)) +
+#   geom_jitter(aes(color = conf_tourney_champ), width = .25) +
+#   geom_hline(yintercept = 5.5) +
+#   geom_hline(yintercept = 4.5) +
+#   geom_hline(yintercept = 3.5) +
+#   geom_hline(yintercept = 2.5) +
+#   geom_hline(yintercept = 1.5) +
+#   geom_hline(yintercept = 0.5) +
+#   labs(x = "Conference Tournament Wins", y = "NCAA Tournament Wins") +
+#   scale_color_discrete(name="Conf. Tourney Champs",
+#                        labels = c("No", "Yes")) +
+# theme_bw() +
+# theme(panel.grid.major = element_blank(),
+#       panel.grid.minor = element_blank())
 
-data2 <- data
+#data2 <- data
 
-tot_teams_year <- data2 %>% 
+tot_teams_year <- data %>% 
   group_by(season, confabbrev) %>% 
   summarise(total_teams = n())
 
@@ -73,7 +73,7 @@ conf_ave_teams <- tot_teams_year %>%
 one_bid_confs <- conf_ave_teams %>% 
   filter(ave_num_teams < 1.5)
 
-data_no_one_bid <- data2 %>% 
+data_no_one_bid <- data %>% 
   filter(!confabbrev %in% one_bid_confs$confabbrev)
   
 library(stringr)
@@ -98,154 +98,155 @@ by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wi
 
 by_larger_conf + facet_wrap(~ conf_name) + theme(legend.position = "none")
 
-data_no_one_bid %>% 
-  filter(confabbrev == "acc" & ncaatour_wins == 6)
+# data_no_one_bid %>% 
+#   filter(confabbrev == "acc" & ncaatour_wins == 6)
+# 
+# data_no_one_bid %>% 
+#   filter(ncaatour_wins == 6) %>% 
+#   group_by(confabbrev) %>% 
+#   summarise(n())
+# 
+# final_four <- data_no_one_bid %>% 
+#   filter(ncaatour_wins >= 4)
+# 
+# ggplot(final_four, aes(x = conftour_wins, y = ncaatour_wins)) + 
+#   geom_jitter(width = .1) + 
+#   geom_hline(yintercept = 5.5) + 
+#   geom_hline(yintercept = 4.5) + 
+#   geom_hline(yintercept = 3.5) + 
+#   geom_hline(yintercept = 2.5) + 
+#   geom_hline(yintercept = 1.5) + 
+#   geom_hline(yintercept = 0.5) + 
+#   xlab("Conference Tournament Wins") + 
+#   ylab("NCAA Tournament Wins") + 
+#   theme_bw() + 
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank())
 
-data_no_one_bid %>% 
-  filter(ncaatour_wins == 6) %>% 
-  group_by(confabbrev) %>% 
-  summarise(n())
+# final_four_conf_wins <- final_four %>% 
+#   group_by(conftour_wins) %>% 
+#   summarise(count = n())
+# 
+# 
+# final_four_conf_wins$conftour_wins <- as.factor(final_four_conf_wins$conftour_wins)
+# 
+# ggplot(final_four_conf_wins, aes(x="", y=count, fill=conftour_wins)) +
+#   geom_bar(stat="identity", width=1, color = "white") +
+#   coord_polar("y", start = 0) + 
+#   theme_void()
+# 
+# data_no_one_bid$seed_num <- as.factor(data_no_one_bid$seed_num)
 
-final_four <- data_no_one_bid %>% 
-  filter(ncaatour_wins >= 4)
+# ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
+#   geom_jitter(aes(color = seed_num), width = .1) + 
+#   geom_hline(yintercept = 5.5) + 
+#   geom_hline(yintercept = 4.5) + 
+#   geom_hline(yintercept = 3.5) + 
+#   geom_hline(yintercept = 2.5) + 
+#   geom_hline(yintercept = 1.5) + 
+#   geom_hline(yintercept = 0.5) + 
+#   xlab("Conference Tournament Wins") + 
+#   ylab("NCAA Tournament Wins") + 
+#   theme_bw() + 
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank())
 
-ggplot(final_four, aes(x = conftour_wins, y = ncaatour_wins)) + 
-  geom_jitter(width = .1) + 
-  geom_hline(yintercept = 5.5) + 
-  geom_hline(yintercept = 4.5) + 
-  geom_hline(yintercept = 3.5) + 
-  geom_hline(yintercept = 2.5) + 
-  geom_hline(yintercept = 1.5) + 
-  geom_hline(yintercept = 0.5) + 
-  xlab("Conference Tournament Wins") + 
-  ylab("NCAA Tournament Wins") + 
-  theme_bw() + 
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
-
-final_four_conf_wins <- final_four %>% 
-  group_by(conftour_wins) %>% 
-  summarise(count = n())
-
-
-final_four_conf_wins$conftour_wins <- as.factor(final_four_conf_wins$conftour_wins)
-
-ggplot(final_four_conf_wins, aes(x="", y=count, fill=conftour_wins)) +
-  geom_bar(stat="identity", width=1, color = "white") +
-  coord_polar("y", start = 0) + 
-  theme_void()
-
-data_no_one_bid$seed_num <- as.factor(data_no_one_bid$seed_num)
-
-ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
-  geom_jitter(aes(color = seed_num), width = .1) + 
-  geom_hline(yintercept = 5.5) + 
-  geom_hline(yintercept = 4.5) + 
-  geom_hline(yintercept = 3.5) + 
-  geom_hline(yintercept = 2.5) + 
-  geom_hline(yintercept = 1.5) + 
-  geom_hline(yintercept = 0.5) + 
-  xlab("Conference Tournament Wins") + 
-  ylab("NCAA Tournament Wins") + 
-  theme_bw() + 
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank())
-
-data_no_one_bid %>% 
-  group_by(seed_num) %>% 
-  summarise(n())
-
-data_no_one_bid %>% 
-  filter(conftour_wins >= 4) %>% 
-  group_by(seed_num) %>% 
-  summarise(n())
-
-conf_champs <- data_no_one_bid %>% 
-  filter(conf_tourney_champ == 1)
-  
-conf_champs_wins <- conf_champs %>% 
-  group_by(season, confabbrev) %>% 
-  summarise(tournament_wins = sum(ncaatour_wins))
-  
-conf_champs_ave_wins <- conf_champs_wins %>% 
-  group_by(confabbrev) %>% 
-  summarise(average_wins = mean(tournament_wins))
+# data_no_one_bid %>% 
+#   group_by(seed_num) %>% 
+#   summarise(n())
+# 
+# data_no_one_bid %>% 
+#   filter(conftour_wins >= 4) %>% 
+#   group_by(seed_num) %>% 
+#   summarise(n())
+# 
+# conf_champs <- data_no_one_bid %>% 
+#   filter(conf_tourney_champ == 1)
+#   
+# conf_champs_wins <- conf_champs %>% 
+#   group_by(season, confabbrev) %>% 
+#   summarise(tournament_wins = sum(ncaatour_wins))
+#   
+# conf_champs_ave_wins <- conf_champs_wins %>% 
+#   group_by(confabbrev) %>% 
+#   summarise(average_wins = mean(tournament_wins))
 
 conferences <- read.csv('Conferences.csv')
 
-ggplot(conf_champs_ave_wins, aes(x = confabbrev, y = average_wins)) +
-  geom_bar(aes(fill = confabbrev), stat = "Identity") +
-  xlab("Conferences") + 
-  ylab("Average Wins") + 
-  theme_bw() + 
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank()) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  theme(legend.position = "none")
+# ggplot(conf_champs_ave_wins, aes(x = confabbrev, y = average_wins)) +
+#   geom_bar(aes(fill = confabbrev), stat = "Identity") +
+#   xlab("Conferences") + 
+#   ylab("Average Wins") + 
+#   theme_bw() + 
+#   theme(panel.grid.major = element_blank(), 
+#         panel.grid.minor = element_blank()) +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#   theme(legend.position = "none")
 
-zero_conf_wins <- data_no_one_bid %>% 
-  filter(conftour_wins == 0)
-one_conf_win <- data_no_one_bid %>% 
-  filter(conftour_wins == 1)
-two_conf_wins <- data_no_one_bid %>% 
-  filter(conftour_wins == 2)
-three_or_more_conf_wins <- data_no_one_bid %>% 
-  filter(conftour_wins >= 3)
+# zero_conf_wins <- data_no_one_bid %>% 
+#   filter(conftour_wins == 0)
+# one_conf_win <- data_no_one_bid %>% 
+#   filter(conftour_wins == 1)
+# two_conf_wins <- data_no_one_bid %>% 
+#   filter(conftour_wins == 2)
+# three_or_more_conf_wins <- data_no_one_bid %>% 
+#   filter(conftour_wins >= 3)
+# 
+# zero_conf_tourwins <- zero_conf_wins %>% 
+#   group_by(season, confabbrev) %>% 
+#   summarise(tournament_wins = sum(ncaatour_wins))
+# one_conf_tourwins <- one_conf_win %>% 
+#   group_by(season, confabbrev) %>% 
+#   summarise(tournament_wins = sum(ncaatour_wins))
+# two_conf_tourwins <- two_conf_wins %>% 
+#   group_by(season, confabbrev) %>% 
+#   summarise(tournament_wins = sum(ncaatour_wins))
+# three_or_more_conf_tourwins <- three_or_more_conf_wins %>% 
+#   group_by(season, confabbrev) %>% 
+#   summarise(tournament_wins = sum(ncaatour_wins))
+#   
+# zero_conf_ave_wins <- zero_conf_tourwins %>% 
+#   group_by(confabbrev) %>% 
+#   summarise(average_wins = mean(tournament_wins))
+# one_conf_ave_wins <- one_conf_tourwins %>% 
+#   group_by(confabbrev) %>% 
+#   summarise(average_wins = mean(tournament_wins))
+# two_conf_ave_wins <- two_conf_tourwins %>% 
+#   group_by(confabbrev) %>% 
+#   summarise(average_wins = mean(tournament_wins))
+# three_or_more_conf_ave_wins <- three_or_more_conf_tourwins %>% 
+#   group_by(confabbrev) %>% 
+#   summarise(average_wins = mean(tournament_wins))
 
-zero_conf_tourwins <- zero_conf_wins %>% 
-  group_by(season, confabbrev) %>% 
-  summarise(tournament_wins = sum(ncaatour_wins))
-one_conf_tourwins <- one_conf_win %>% 
-  group_by(season, confabbrev) %>% 
-  summarise(tournament_wins = sum(ncaatour_wins))
-two_conf_tourwins <- two_conf_wins %>% 
-  group_by(season, confabbrev) %>% 
-  summarise(tournament_wins = sum(ncaatour_wins))
-three_or_more_conf_tourwins <- three_or_more_conf_wins %>% 
-  group_by(season, confabbrev) %>% 
-  summarise(tournament_wins = sum(ncaatour_wins))
-  
-zero_conf_ave_wins <- zero_conf_tourwins %>% 
-  group_by(confabbrev) %>% 
-  summarise(average_wins = mean(tournament_wins))
-one_conf_ave_wins <- one_conf_tourwins %>% 
-  group_by(confabbrev) %>% 
-  summarise(average_wins = mean(tournament_wins))
-two_conf_ave_wins <- two_conf_tourwins %>% 
-  group_by(confabbrev) %>% 
-  summarise(average_wins = mean(tournament_wins))
-three_or_more_conf_ave_wins <- three_or_more_conf_tourwins %>% 
-  group_by(confabbrev) %>% 
-  summarise(average_wins = mean(tournament_wins))
-
-zero_conf_ave_wins <- zero_conf_ave_wins %>% rename(zero_ave_wins = average_wins)
-one_conf_ave_wins <- one_conf_ave_wins %>% rename(one_ave_wins = average_wins)
-two_conf_ave_wins <- two_conf_ave_wins %>% rename(two_ave_wins = average_wins)
-three_or_more_conf_ave_wins <- three_or_more_conf_ave_wins %>% rename(three_plus_ave_wins = average_wins)
-
-ave_wins <- left_join(zero_conf_ave_wins, one_conf_ave_wins, by = 'confabbrev') %>% 
-  left_join(., two_conf_ave_wins, by = 'confabbrev') %>% 
-  left_join(., three_or_more_conf_ave_wins, by = 'confabbrev')
-
-ave_wins_long <- gather(ave_wins, key = conf_wins, value = ave_ncaa_wins, -confabbrev)
-
-ggplot(ave_wins_long, aes(x = confabbrev, y = ave_ncaa_wins)) +
-  geom_bar(aes(fill = conf_wins), stat = "identity", position = "dodge") 
-
-ave_wins_long$conf_wins <- str_replace_all(ave_wins_long$conf_wins, c('zero_ave_wins' = 'zero', 
-                                  'one_ave_wins' = 'one', 
-                                  'two_ave_wins' = 'two', 
-                                  'three_plus_ave_wins' = 'three +'))
-ave_wins_long$conf_wins <- factor(ave_wins_long$conf_wins, levels = c('three +',
-                                                                         'two',
-                                                                         'one', 
-                                                                         'zero'))
-
+# zero_conf_ave_wins <- zero_conf_ave_wins %>% rename(zero_ave_wins = average_wins)
+# one_conf_ave_wins <- one_conf_ave_wins %>% rename(one_ave_wins = average_wins)
+# two_conf_ave_wins <- two_conf_ave_wins %>% rename(two_ave_wins = average_wins)
+# three_or_more_conf_ave_wins <- three_or_more_conf_ave_wins %>% rename(three_plus_ave_wins = average_wins)
+# 
+# ave_wins <- left_join(zero_conf_ave_wins, one_conf_ave_wins, by = 'confabbrev') %>% 
+#   left_join(., two_conf_ave_wins, by = 'confabbrev') %>% 
+#   left_join(., three_or_more_conf_ave_wins, by = 'confabbrev')
+# 
+# ave_wins_long <- gather(ave_wins, key = conf_wins, value = ave_ncaa_wins, -confabbrev)
+# 
+# ggplot(ave_wins_long, aes(x = confabbrev, y = ave_ncaa_wins)) +
+#   geom_bar(aes(fill = conf_wins), stat = "identity", position = "dodge") 
+# 
+# ave_wins_long$conf_wins <- str_replace_all(ave_wins_long$conf_wins, c('zero_ave_wins' = 'zero', 
+#                                   'one_ave_wins' = 'one', 
+#                                   'two_ave_wins' = 'two', 
+#                                   'three_plus_ave_wins' = 'three +'))
+# ave_wins_long$conf_wins <- factor(ave_wins_long$conf_wins, levels = c('three +',
+#                                                                          'two',
+#                                                                          'one', 
+#                                                                          'zero'))
+# 
+# 
 
 data_no_one_bid3 <- data_no_one_bid
 
 for (x in 1:NROW(data_no_one_bid3)) {
-  data_no_one_bid3[x, 'conftour_wins'] <- 
+  data_no_one_bid3[x, 'conftour_wins'] <-
     ifelse(data_no_one_bid3[x, 'conftour_wins'] >= 3, 3, data_no_one_bid3[x, 'conftour_wins'])
 }
 

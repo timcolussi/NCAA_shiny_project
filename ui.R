@@ -4,7 +4,7 @@ library(shinydashboard)
 
 shinyUI(
   dashboardPage(
-    dashboardHeader(),
+    dashboardHeader(title = "March Madness"),
     dashboardSidebar(),
     dashboardBody()
   )
