@@ -1,6 +1,11 @@
 library(tidyverse)
 library(ggplot2)
 library(DT)
+library(Cairo)
+options(shiny.usecairo=T)
+library(htmltools)
+library(plotly)
+
 
 setwd("~/NYCDSA/Shiny_project/NCAA_shiny_project")
 
@@ -134,6 +139,7 @@ wins_byconf_faceted <- ggplot(ave_wins_confwins2, aes(x = conftour_wins, y = ave
   facet_wrap(~ ConfName) +
   xlab("Conference Tournament Wins") +
   ylab("Average NCAA Tournament Wins") +
+  theme_bw() +
   theme(legend.position = "none")
 
 power_confs <- conf_ave_teams %>% 
@@ -166,6 +172,61 @@ select_confs <- rbind(power_confs, mid_major)
 #select_confs <- left_join(select_confs, conferences[, c('ConfAbbrev', 'Description')], 
                           #by = c('confabbrev' = 'ConfAbbrev'))
 select_confs <- rename(select_confs, 'ConfName' = 'Description')
+
+select_confs$ConfName <- str_replace(select_confs$ConfName, 'Conference', '')
+select_confs$ConfName <- str_replace(select_confs$ConfName, 'USA', 'Conference USA')
+select_confs$ConfName <- str_replace(select_confs$ConfName, 'Southeastern', 'SEC')
+
+conf_choices <- select_confs$ConfName
+
+acc <- data_no_one_bid %>% 
+  filter(confabbrev == 'acc')
+acc_appearances <- acc %>% 
+  group_by(teamid) %>% 
+  summarise(appearances = n()) %>% 
+  arrange(desc(appearances))
+acc_appearances <- left_join(acc_appearances, teams[, c('TeamID', 'TeamName')], by = c('teamid' = 'TeamID'))
+acc_ave_wins <- acc %>% 
+  group_by(teamid) %>% 
+  summarise(ave_ncaa_wins = mean(ncaatour_wins))
+acc_apps_wins <- left_join(acc_appearances, acc_ave_wins[, c('teamid', 'ave_ncaa_wins')], by = 'teamid')
+acc_apps_wins <- acc_apps_wins[, c('TeamName', 'appearances', 'ave_ncaa_wins')]
+acc_wins <- ave_wins_confwins %>% 
+  filter(confabbrev == 'acc')
+acc_plot <- ggplot(acc_wins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conftour_wins), stat = 'identity') +
+  xlab("Conference Tournament Wins") + 
+  ylab("Average NCAA Tournament Wins") + 
+  theme_bw() +
+  theme(legend.position = "none")
+
+a_ten <- data_no_one_bid %>% 
+  filter(confabbrev == 'a_ten')
+a_ten_appearances <- a_ten %>% 
+  group_by(teamid) %>% 
+  summarise(appearances = n()) %>% 
+  arrange(desc(appearances))
+a_ten_appearances <- left_join(a_ten_appearances, teams[, c('TeamID', 'TeamName')], by = c('teamid' = 'TeamID'))
+a_ten_ave_wins <- a_ten %>% 
+  group_by(teamid) %>% 
+  summarise(ave_ncaa_wins = mean(ncaatour_wins))
+a_ten_apps_wins <- left_join(a_ten_appearances, a_ten_ave_wins[, c('teamid', 'ave_ncaa_wins')], by = 'teamid')
+a_ten_apps_wins <- a_ten_apps_wins[, c('TeamName', 'appearances', 'ave_ncaa_wins')]
+a_ten_wins <- ave_wins_confwins %>% 
+  filter(confabbrev == 'a_ten')
+a_ten_plot <- ggplot(a_ten_wins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conftour_wins), stat = 'identity') +
+  xlab("Conference Tournament Wins") + 
+  ylab("Average NCAA Tournament Wins") + 
+  theme_bw() +
+  theme(legend.position = "none")
+
+
+
+
+
+
+
 
 
 
