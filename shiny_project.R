@@ -57,6 +57,14 @@ by_season <- ggplot(data, aes(x = conftour_wins, y = ncaatour_wins)) +
 
 #data2 <- data
 
+#sum(data2$confabbrev == 'pac_ten')
+#sum(data2$confabbrev == 'pac_twelve')
+
+
+data$confabbrev <- str_replace(data$confabbrev, "pac_ten", "pac_twelve")
+sum(data$confabbrev == 'pac_ten')
+
+
 tot_teams_year <- data %>% 
   group_by(season, confabbrev) %>% 
   summarise(total_teams = n())
@@ -79,7 +87,7 @@ data_no_one_bid <- data %>%
 library(stringr)
 data_no_one_bid$seed_num <- as.numeric(str_extract_all(data_no_one_bid$seed, "[0-9]+"))
 
-data_no_one_bid$confabbrev <- str_replace(data_no_one_bid$confabbrev, "pac_ten", "pac_twelve")
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, "Pacific-10 Conference", "Pacific-12 Conference")
 
 
 by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 

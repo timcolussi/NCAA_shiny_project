@@ -11,21 +11,34 @@ data <- data[-c(1263,1264), ]
 data[is.na(data)] <- 0
 data$season <- as.character(data$season)
 
+data$confabbrev <- str_replace(data$confabbrev, "pac_ten", "pac_twelve")
+sum(data$confabbrev == 'pac_ten')
+
+
 tot_teams_year <- data %>% 
   group_by(season, confabbrev) %>% 
   summarise(total_teams = n())
+
 tot_seasons <- tot_teams_year %>% 
   group_by(confabbrev) %>% 
   summarise(num_of_seasons = n())
+
 conf_ave_teams <- tot_teams_year %>% 
   group_by(confabbrev) %>% 
   summarise(ave_num_teams = sum(total_teams)/n()) %>% 
   arrange(desc(ave_num_teams))
+
 one_bid_confs <- conf_ave_teams %>% 
   filter(ave_num_teams < 1.5)
+
 data_no_one_bid <- data %>% 
   filter(!confabbrev %in% one_bid_confs$confabbrev)
-data_no_one_bid$confabbrev <- str_replace(data_no_one_bid$confabbrev, "pac_ten", "pac_twelve")
+
+library(stringr)
+data_no_one_bid$seed_num <- as.numeric(str_extract_all(data_no_one_bid$seed, "[0-9]+"))
+
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, "Pacific-10 Conference", "Pacific-12 Conference")
+
 
 by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
   geom_jitter(aes(color = conf_name), width = .1) + 
