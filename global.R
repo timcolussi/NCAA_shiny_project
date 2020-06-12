@@ -82,6 +82,12 @@ ave_wins_wins$conf_type <- as.factor(ave_wins_wins$conf_type)
 
 teams <- read_csv("MTeams.csv")
 
+select_confs <- rbind(power_confs, mid_major)
+select_confs <- left_join(select_confs, conferences[, c('ConfAbbrev', 'Description')], 
+                          by = c('confabbrev' = 'ConfAbbrev'))
+select_confs <- rename(select_confs, 'ConfName' = 'Description')
+
+choice <- select_confs$ConfName
 
 
 
