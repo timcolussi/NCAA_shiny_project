@@ -24,7 +24,8 @@ shinyUI(
         tabItem(tabName = "overall",
                 "scatterplot of all data"),
         tabItem(tabName = "subset",
-                "graphs showing the subset conferences along with along with explanation and table"),
+                fluidRow(box(DT::dataTableOutput("subset_table")),
+                         box(plotOutput("subset_graph")))),
         tabItem(tabName = "power_conf",
                 "graph showing average wins of power conferences along with dropdown menu")
       )

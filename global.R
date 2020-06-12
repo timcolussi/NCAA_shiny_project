@@ -1,5 +1,7 @@
 library(tidyverse)
 library(ggplot2)
+library(DT)
+
 setwd("~/NYCDSA/Shiny_project/NCAA_shiny_project")
 
 final_compare_ncaa_conf_wins_seeds_champs <- read.csv("final_compare_ncaa_conf_wins_seeds_champs.csv")
@@ -24,6 +26,22 @@ one_bid_confs <- conf_ave_teams %>%
 data_no_one_bid <- data %>% 
   filter(!confabbrev %in% one_bid_confs$confabbrev)
 data_no_one_bid$confabbrev <- str_replace(data_no_one_bid$confabbrev, "pac_ten", "pac_twelve")
+
+by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
+  geom_jitter(aes(color = conf_name), width = .1) + 
+  geom_hline(yintercept = 5.5) + 
+  geom_hline(yintercept = 4.5) + 
+  geom_hline(yintercept = 3.5) + 
+  geom_hline(yintercept = 2.5) + 
+  geom_hline(yintercept = 1.5) + 
+  geom_hline(yintercept = 0.5) + 
+  xlab("Conference Tournament Wins") + 
+  ylab("NCAA Tournament Wins") + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) 
+
+by_larger_conf + facet_wrap(~ conf_name) + theme(legend.position = "none")
 
 conferences <- read.csv('Conferences.csv')
 
