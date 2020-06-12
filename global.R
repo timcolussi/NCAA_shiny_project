@@ -11,9 +11,22 @@ data <- data[-c(1263,1264), ]
 data[is.na(data)] <- 0
 data$season <- as.character(data$season)
 
+by_season <- ggplot(data, aes(x = conftour_wins, y = ncaatour_wins)) + 
+  geom_jitter(aes(color = season), width = .25, size = 3) + 
+  geom_hline(yintercept = 5.5) + 
+  geom_hline(yintercept = 4.5) + 
+  geom_hline(yintercept = 3.5) + 
+  geom_hline(yintercept = 2.5) + 
+  geom_hline(yintercept = 1.5) + 
+  geom_hline(yintercept = 0.5) + 
+  xlab("Conference Tournament Wins") + 
+  ylab("NCAA Tournament Wins") + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+
 data$confabbrev <- str_replace(data$confabbrev, "pac_ten", "pac_twelve")
 sum(data$confabbrev == 'pac_ten')
-
 
 tot_teams_year <- data %>% 
   group_by(season, confabbrev) %>% 
@@ -28,6 +41,23 @@ conf_ave_teams <- tot_teams_year %>%
   summarise(ave_num_teams = sum(total_teams)/n()) %>% 
   arrange(desc(ave_num_teams))
 
+conf_ave_teams$ave_num_teams <- round(conf_ave_teams$ave_num_teams, digits = 1)
+
+conf_ave_teams <- left_join(conf_ave_teams, conferences[, c('ConfAbbrev', 'Description')],
+                                by = c('confabbrev' = 'ConfAbbrev'))
+conf_ave_teams_adj <- select(conf_ave_teams, c(3,2))
+
+conf_ave_teams_adj <- conf_ave_teams_adj %>% 
+  rename('ConfName' = 'Description')
+
+conf_ave_teams_adj$ConfName  <- str_replace(conf_ave_teams_adj$ConfName, 'Conference', '')
+conf_ave_teams_adj$ConfName <- str_replace(conf_ave_teams_adj$ConfName, 'USA', 'Conference USA')
+conf_ave_teams_adj$ConfName <- str_replace(conf_ave_teams_adj$ConfName, 'Southeastern', 'SEC')
+conf_ave_teams_adj <- rename(conf_ave_teams_adj, 
+                             c("Conference Name" = "ConfName", 
+                               "Average Number of Teams" = "ave_num_teams"))
+
+
 one_bid_confs <- conf_ave_teams %>% 
   filter(ave_num_teams < 1.5)
 
@@ -39,6 +69,9 @@ data_no_one_bid$seed_num <- as.numeric(str_extract_all(data_no_one_bid$seed, "[0
 
 data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, "Pacific-10 Conference", "Pacific-12 Conference")
 
+data_no_one_bid$conf_name  <- str_replace(data_no_one_bid$conf_name, 'Conference', '')
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, 'USA', 'Conference USA')
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, 'Southeastern', 'SEC')
 
 by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
   geom_jitter(aes(color = conf_name), width = .1) + 
@@ -96,6 +129,13 @@ ave_wins_confwins2$ConfName  <- str_replace(ave_wins_confwins2$ConfName, 'Confer
 ave_wins_confwins2$ConfName <- str_replace(ave_wins_confwins2$ConfName, 'USA', 'Conference USA')
 ave_wins_confwins2$ConfName <- str_replace(ave_wins_confwins2$ConfName, 'Southeastern', 'SEC')
 
+wins_byconf_faceted <- ggplot(ave_wins_confwins2, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conftour_wins), stat = 'identity', position = 'dodge') +
+  facet_wrap(~ ConfName) +
+  xlab("Conference Tournament Wins") +
+  ylab("Average NCAA Tournament Wins") +
+  theme(legend.position = "none")
+
 power_confs <- conf_ave_teams %>% 
   filter(ave_num_teams > 4)
 mid_major <- conf_ave_teams %>% 
@@ -111,14 +151,23 @@ mid_ave_wins_wins$conf_type <- 'mid major'
 ave_wins_wins <- rbind(power_ave_wins_wins, mid_ave_wins_wins)
 ave_wins_wins$conf_type <- as.factor(ave_wins_wins$conf_type)
 
+wins_by_conftype <- ggplot(ave_wins_wins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conf_type), stat = 'identity', position = 'dodge') +
+  xlab("Conference Tournament Wins") +
+  ylab("Average NCAA Tournament Wins") +
+  guides(fill=guide_legend(title="Conference Type"))
+
+
+
+
 teams <- read_csv("MTeams.csv")
 
 select_confs <- rbind(power_confs, mid_major)
-select_confs <- left_join(select_confs, conferences[, c('ConfAbbrev', 'Description')], 
-                          by = c('confabbrev' = 'ConfAbbrev'))
+#select_confs <- left_join(select_confs, conferences[, c('ConfAbbrev', 'Description')], 
+                          #by = c('confabbrev' = 'ConfAbbrev'))
 select_confs <- rename(select_confs, 'ConfName' = 'Description')
 
-choice <- select_confs$ConfName
+
 
 
 

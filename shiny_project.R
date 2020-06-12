@@ -78,6 +78,8 @@ conf_ave_teams <- tot_teams_year %>%
   summarise(ave_num_teams = sum(total_teams)/n()) %>% 
   arrange(desc(ave_num_teams))
 
+conf_ave_teams$ave_num_teams <- round(conf_ave_teams$ave_num_teams, digits = 1)
+
 one_bid_confs <- conf_ave_teams %>% 
   filter(ave_num_teams < 1.5)
 
@@ -295,6 +297,8 @@ wins_byconf_faceted <- ggplot(ave_wins_confwins2, aes(x = conftour_wins, y = ave
   xlab("Conference Tournament Wins") +
   ylab("Average NCAA Tournament Wins") +
   theme(legend.position = "none")
+
+wins_byconf_faceted + ylim(0, 3) + theme_bw()
 
 power_confs <- conf_ave_teams %>% 
   filter(ave_num_teams > 4)
