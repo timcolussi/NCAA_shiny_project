@@ -1,0 +1,224 @@
+---
+title: "NCAA Shiny Project"
+author: "Tim Colussi"
+date: "6/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(DT)
+library(Cairo)
+options(shiny.usecairo=T)
+library(htmltools)
+library(plotly)
+library(stringr)
+library(shiny)
+```
+
+## Project Overview
+
+### Is there a relationship between Conference Tournament performance and NCAA Tournament performace?
+
+Every year in March, the NCAA holds it's March Madness basketball tournament to crown a National Champion. Prior to this, many conferences also hold a conference tournament to name their Conference Champions. I've often wondered 'Is there any correlation to how a team peforms in their conference tourney and how they perform in the Big Dance? So I decided to dive into the data.
+
+**Data taken from the NCAA and [Google Cloud ML Kaggle](https://www.kaggle.com/c/google-cloud-ncaa-march-madness-2020-division-1-mens-tournament/overview) competition. (The competition this data was taken from did not occur because the 2020 NCAA Tournament was cancelled due to COVID-19). Conference Tournament data only went back to 2001, so I truncated all the data to 2001.
+
+### Comparing Conference Tournament wins and NCAA Tournament wins by season
+
+
+
+```{r importing, echo=FALSE}
+final_compare_ncaa_conf_wins_seeds_champs <- read.csv("final_compare_ncaa_conf_wins_seeds_champs.csv")
+conferences <- read.csv("Conferences.csv")
+
+data <- final_compare_ncaa_conf_wins_seeds_champs
+data <- data[-c(1263,1264), ]
+data[is.na(data)] <- 0
+data$season <- as.character(data$season)
+
+```
+
+```{r overall plot, echo=FALSE, eval=TRUE }
+by_season <- ggplot(data, aes(x = conftour_wins, y = ncaatour_wins)) + 
+  geom_jitter(aes(color = season), width = .25, size = 3) + 
+  geom_hline(yintercept = 5.5) + 
+  geom_hline(yintercept = 4.5) + 
+  geom_hline(yintercept = 3.5) + 
+  geom_hline(yintercept = 2.5) + 
+  geom_hline(yintercept = 1.5) + 
+  geom_hline(yintercept = 0.5) + 
+  xlab("Conference Tournament Wins") + 
+  ylab("NCAA Tournament Wins") + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank())
+
+by_season
+
+```
+
+Overall, There doesn't seem to be too much of a correlation. It could be said that only one team has ever won more than 3 games in thier Conference tournament and won the National Championship (UConn, 2011). The reverse can also be said, no team that has not won at least won Conference Tournament game and won the National Championship. But I wanted to look deeper.
+
+### Subsetting the Conferences
+
+Every Conference Tournament champion automatically makes the NCAA Tournament. For a lot of conferences, this is the only team that makes it into the field. These teams, also, often do not win a single game. These conferences should be filtered out to really get at the underlying question. Here I averaged the number of teams that make it each year for each conference and filtered out those that average less than 1.5. The reasoning is that more often than not these conferences only send one team.
+
+```{r subsetting conferences, echo=FALSE, error=FALSE, message=FALSE}
+data$confabbrev <- str_replace(data$confabbrev, "pac_ten", "pac_twelve")
+#sum(data$confabbrev == 'pac_ten')
+
+tot_teams_year <- data %>% 
+  group_by(season, confabbrev) %>% 
+  summarise(total_teams = n())
+
+tot_seasons <- tot_teams_year %>% 
+  group_by(confabbrev) %>% 
+  summarise(num_of_seasons = n())
+
+conf_ave_teams <- tot_teams_year %>% 
+  group_by(confabbrev) %>% 
+  summarise(ave_num_teams = sum(total_teams)/n()) %>% 
+  arrange(desc(ave_num_teams))
+
+conf_ave_teams$ave_num_teams <- round(conf_ave_teams$ave_num_teams, digits = 1)
+
+conf_ave_teams <- left_join(conf_ave_teams, conferences[, c('ConfAbbrev', 'Description')],
+                                by = c('confabbrev' = 'ConfAbbrev'))
+conf_ave_teams_adj <- select(conf_ave_teams, c(3,2))
+
+conf_ave_teams_adj <- conf_ave_teams_adj %>% 
+  rename('ConfName' = 'Description')
+
+conf_ave_teams_adj$ConfName  <- str_replace(conf_ave_teams_adj$ConfName, 'Conference', '')
+conf_ave_teams_adj$ConfName <- str_replace(conf_ave_teams_adj$ConfName, 'USA', 'Conference USA')
+conf_ave_teams_adj$ConfName <- str_replace(conf_ave_teams_adj$ConfName, 'Southeastern', 'SEC')
+conf_ave_teams_adj <- rename(conf_ave_teams_adj, 
+                             c("Conference Name" = "ConfName", 
+                               "Average Number of Teams" = "ave_num_teams"))
+
+
+one_bid_confs <- conf_ave_teams %>% 
+  filter(ave_num_teams < 1.5)
+
+data_no_one_bid <- data %>% 
+  filter(!confabbrev %in% one_bid_confs$confabbrev)
+
+data_no_one_bid$seed_num <- as.numeric(str_extract_all(data_no_one_bid$seed, "[0-9]+"))
+
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, "Pacific-10 Conference", "Pacific-12 Conference")
+
+data_no_one_bid$conf_name  <- str_replace(data_no_one_bid$conf_name, 'Conference', '')
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, 'USA', 'Conference USA')
+data_no_one_bid$conf_name <- str_replace(data_no_one_bid$conf_name, 'Southeastern', 'SEC')
+
+by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wins)) + 
+  geom_jitter(aes(color = conf_name), width = .1) + 
+  geom_hline(yintercept = 5.5) + 
+  geom_hline(yintercept = 4.5) + 
+  geom_hline(yintercept = 3.5) + 
+  geom_hline(yintercept = 2.5) + 
+  geom_hline(yintercept = 1.5) + 
+  geom_hline(yintercept = 0.5) + 
+  xlab("Conference Tournament Wins") + 
+  ylab("NCAA Tournament Wins") + 
+  theme_bw() + 
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()) 
+
+
+
+
+```
+
+```{r subset table, echo=FALSE}
+datatable(conf_ave_teams_adj)
+
+by_larger_conf + facet_wrap(~ conf_name) + theme(legend.position = "none")
+```
+
+
+### Power Conferences
+
+After subsetting to conferences averaging more than 1.5, we are down to 12. There does not seem to be any overwhelming trends, just a few possibly interesting observations. We can subset even further to the The Power Conferences. These are conferences that average sending 4 or more teams to the Dance.
+
+```{r power conf, message=FALSE, warning=FALSE, echo=FALSE}
+data_no_one_bid3 <- data_no_one_bid
+
+for (x in 1:NROW(data_no_one_bid3)) {
+  data_no_one_bid3[x, 'conftour_wins'] <-
+    ifelse(data_no_one_bid3[x, 'conftour_wins'] >= 3, 3, data_no_one_bid3[x, 'conftour_wins'])
+}
+
+ave_wins_confwins <- data_no_one_bid3 %>% 
+  group_by(confabbrev, conftour_wins) %>% 
+  summarise(ave_ncaa_wins = mean(ncaatour_wins))
+
+ave_wins_confwins$conftour_wins <- as.character(ave_wins_confwins$conftour_wins)
+
+for (x in 1:NROW(ave_wins_confwins)) {
+  if (ave_wins_confwins[x, 'conftour_wins'] == '0') {
+    ave_wins_confwins[x, 'conftour_wins'] <- 'zero'
+  } else if (ave_wins_confwins[x, 'conftour_wins'] == '1') {
+    ave_wins_confwins[x, 'conftour_wins'] <- 'one'
+  } else if (ave_wins_confwins[x, 'conftour_wins'] == '2') {
+    ave_wins_confwins[x, 'conftour_wins'] <- 'two'
+  } else {ave_wins_confwins[x, 'conftour_wins'] <- 'three +'}
+}
+
+ave_wins_confwins$conftour_wins <- factor(ave_wins_confwins$conftour_wins, 
+                                          levels = c('three +', 
+                                                     'two',
+                                                     'one',
+                                                     'zero'))
+
+ave_wins_confwins2 <- left_join(ave_wins_confwins, conferences[, c('ConfAbbrev', 'Description')],
+                                by = c('confabbrev' = 'ConfAbbrev'))
+ave_wins_confwins2 <- ave_wins_confwins2 %>% 
+  rename('ConfName' = 'Description')
+
+ave_wins_confwins2$ConfName  <- str_replace(ave_wins_confwins2$ConfName, 'Conference', '')
+ave_wins_confwins2$ConfName <- str_replace(ave_wins_confwins2$ConfName, 'USA', 'Conference USA')
+ave_wins_confwins2$ConfName <- str_replace(ave_wins_confwins2$ConfName, 'Southeastern', 'SEC')
+
+wins_byconf_faceted <- ggplot(ave_wins_confwins2, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conftour_wins), stat = 'identity', position = 'dodge') +
+  facet_wrap(~ ConfName) +
+  xlab("Conference Tournament Wins") +
+  ylab("Average NCAA Tournament Wins") +
+  theme_bw() +
+  theme(legend.position = "none")
+
+power_confs <- conf_ave_teams %>% 
+  filter(ave_num_teams > 4)
+mid_major <- conf_ave_teams %>% 
+  filter(ave_num_teams > 1.5 & ave_num_teams < 4)
+
+ave_wins_confwins2 <- ave_wins_confwins
+power_ave_wins_wins <- ave_wins_confwins %>% 
+  filter(confabbrev %in% power_confs$confabbrev)
+power_ave_wins_wins$conf_type <- 'power'
+mid_ave_wins_wins <- ave_wins_confwins %>% 
+  filter(confabbrev %in% mid_major$confabbrev)
+mid_ave_wins_wins$conf_type <- 'mid major'
+ave_wins_wins <- rbind(power_ave_wins_wins, mid_ave_wins_wins)
+ave_wins_wins$conf_type <- as.factor(ave_wins_wins$conf_type)
+
+wins_by_conftype <- ggplot(ave_wins_wins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
+  geom_bar(aes(fill = conf_type), stat = 'identity', position = 'dodge') +
+  xlab("Conference Tournament Wins") +
+  ylab("Average NCAA Tournament Wins") +
+  guides(fill=guide_legend(title="Conference Type"))
+```
+
+```{r plot graphs, echo=FALSE, eval=TRUE}
+wins_byconf_faceted + ylim(0, 3) + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+wins_by_conftype
+```
+
+Though not strong, the trend seems to suggest that conference champions perform better. Big East and West Coast champions average twice as many wins as other teams that make it, although most of the wins from the WCC champions come from Gonzaga. AAC teams that win two conference games have a way higher average than other teams; however, the conference has not been around that long so there is not enough data points to make any major conclusions. Not surprising, power conference teams overall average more wins in the NCAA Tournament.
+
+
