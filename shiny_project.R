@@ -577,7 +577,7 @@ wcc_plot <- ggplot(wcc_wins, aes(x = conftour_wins, y = ave_ncaa_wins)) +
   theme(legend.position = "none")
 
 
-
+#https://www.kaggle.com/c/google-cloud-ncaa-march-madness-2020-division-1-mens-tournament/overview
 
 
 
