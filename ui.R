@@ -9,9 +9,10 @@ shinyUI(
     dashboardSidebar(
       sidebarMenu(
         menuItem("Overview", tabName = "overview", icon = icon('eye')),
-        menuItem("All Conferences", tabName = "overall", icon = icon('globe-americas')),
+        menuItem("Through the Years", tabName = "overall", icon = icon('calendar')),
         menuItem("Conference Subsetting", tabName = "subset", icon = icon('chart-bar')),
-        menuItem("Power Conferences", tabName = "power_conf", icon = icon('megaport'))
+        menuItem("Power Conferences", tabName = "power_conf", icon = icon('megaport')),
+        menuItem("All Conferences Breakdown", tabName = "conf_breakdown", icon = icon('globe-americas'))
       )
     ),
     dashboardBody(
@@ -43,7 +44,7 @@ shinyUI(
         tabItem(tabName = "overall",
                 h3("Overall, There doesn't seem to be too much of a correlation. 
                    It could be said that only one team has ever won more than 3 games in thier Conference
-                   tournament and won the National Championship. The reverse can also be said, no team that 
+                   tournament and won the National Championship (UConn, 2011). The reverse can also be said, no team that 
                    has not won at least won Conference Tournament game and won the National Championship.
                    But I want to look deeper."),
                 fluidRow(plotOutput("overall_graph"))),
@@ -69,7 +70,15 @@ shinyUI(
                    that win two conference games have a way higher average than other teams; however,
                    the conference has not been around that long so there is not enough data points to 
                    make any major conclusions. Not surprising, power conference teams overall average 
-                   more wins in the NCAA Tournament."))
+                   more wins in the NCAA Tournament.")),
+        tabItem(tabName = "conf_breakdown",
+                selectInput("selected", label = h3("Choose a Conference"), 
+                            choices = choices, 
+                            selected = "a_sun"),
+                fluidRow(infoBoxOutput("totBox")),
+                fluidRow(infoBoxOutput("winsBox")),
+                fluidRow(infoBoxOutput("champsBox")),
+                h6("*Since 2001"))
                 
       )
     )
