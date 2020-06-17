@@ -94,7 +94,8 @@ by_larger_conf <- ggplot(data_no_one_bid, aes(x = conftour_wins, y = ncaatour_wi
 
 by_larger_conf + facet_wrap(~ conf_name) + theme(legend.position = "none")
 
-conferences <- read.csv('Conferences.csv')
+conferences <- read.csv("Conferences.csv")
+
 
 data_no_one_bid3 <- data_no_one_bid
 

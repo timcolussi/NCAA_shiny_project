@@ -42,7 +42,7 @@ shinyUI(
                    Conference Tournament data only went back to 2001, so I truncated all the
                    data to 2001.")),
         tabItem(tabName = "overall",
-                h3("Overall, There doesn't seem to be too much of a correlation. 
+                h4("Overall, There doesn't seem to be too much of a correlation. 
                    It could be said that only one team has ever won more than 3 games in thier Conference
                    tournament and won the National Championship (UConn, 2011). The reverse can also be said, no team that 
                    has not won at least won Conference Tournament game and won the National Championship.

@@ -2,7 +2,7 @@
 shinyServer(
   function(input,output) {
     
-    output$overall_graph <- renderPlot(by_season, res = 128, height = 500, width = 1000)
+    output$overall_graph <- renderPlot(by_season, res = 128, height = 600, width = 1000)
     
     output$subset_table <- DT::renderDataTable(conf_ave_teams_adj, rownames=FALSE)
     output$subset_graph <- renderPlot(by_larger_conf + facet_wrap(~ conf_name) + theme(legend.position = "none"),
